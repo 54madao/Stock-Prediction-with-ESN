@@ -15,5 +15,9 @@ function outputWeights = pseudoinverse(stateCollectMat, teachCollectMat)
 % containing the learnt weights
 %
 % Version 1.0, May 16, 2013
-  
-outputWeights = (pinv(stateCollectMat)*teachCollectMat)' ; 
+try
+    outputWeights = (pinv(stateCollectMat)*teachCollectMat)' ; 
+catch
+    disp('errorRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR');
+    outputWeights=0;
+end

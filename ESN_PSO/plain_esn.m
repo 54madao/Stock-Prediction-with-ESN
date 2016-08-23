@@ -11,6 +11,7 @@ function internalState = plain_esn(totalstate , esn , varargin)
 %
 % Version 1.0, May 16, 2013
 
+
 % compute a new internal state
 internalState =  feval( esn.reservoirActivationFunction , ...
     [esn.internalWeights , esn.inputWeights , esn.feedbackWeights * diag(esn.feedbackScaling )] * totalstate)  ;   

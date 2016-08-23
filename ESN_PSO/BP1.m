@@ -1,8 +1,8 @@
 %data_b=load('test.txt');
 %data_b=data_b(1:1200,1);
 clear all
-data=load('data600016.txt');
-data=data(1:1230,1);
+data=load('C:\Users\Stanley Guo\Downloads\ESN\ESN8\Data\data601919.txt');
+data=data(1:1230,2);
 
 inputMax=max(data');
 inputMin=min(data');
@@ -35,23 +35,25 @@ recordNMSE_b = 1000;
 for i_b=1:50
 
 %建立网络
-net = newff ( traininputSeq_b' ,trainoutputSeq_b',10,{ 'logsig','purelin'} ,'trainlm', 'learngdm','mse') ;
+net = newff ( traininputSeq_b' ,trainoutputSeq_b',14,{ 'logsig','purelin'} ,'trainlm', 'learngdm','mse') ;
 %初始化
 net = init (net) ;
 %for k_b=1:960
 %网络训练
+net.trainParam.showWindow=0;
 net. trainParam. show = 100 ; %设置训练显示间隔次数
 net. trainParam. epochs = 20000 ; %设置最大训练循环次数
-net. trainParam. goal = 0.0001 ; %设置性能目标值
+net. trainParam. goal = 0.00001 ; %设置性能目标值
 net. trainParam. lr = 0.01 ; %设置学习系数
 %[ net ,tr ] = train(net ,traininputSeq_b(k_b,:)',trainoutputSeq_b(k_b,1)') ; %网络训练
 [ net ,tr ] = train(net ,traininputSeq_b',trainoutputSeq_b') ;
 %网络仿真
 %end
-predictedTestOutput_b=zeros(1,240);
-for j_b=1:240
-predictedTestOutput_b(1,j_b) = sim(net ,testinputSeq_b(j_b,:)') ; %仿真计算
-end
+%predictedTestOutput_b=zeros(1,240);
+% for j_b=1:240
+% predictedTestOutput_b(1,j_b) = sim(net ,testinputSeq_b(j_b,:)') ; %仿真计算
+% end
+predictedTestOutput_b=net(testinputSeq_b');
 predictedTestOutput_b=predictedTestOutput_b*(inputMax-inputMin)+inputMin;
 predictedTestOutput_b=predictedTestOutput_b(1,101:end);
 testoutputSeq1_b=testoutputSeq_b(101:end,1);

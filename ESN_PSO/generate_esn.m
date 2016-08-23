@@ -1,4 +1,4 @@
-function esn = generate_esn(nInputUnits, nInternalUnits, nOutputUnits,reservoirType,varargin)
+function esn = generate_esn(nInputUnits, nInternalUnits, nOutputUnits,reservoirType,varSwarm,varargin)
 %%%%% input arguments:
 % nInputUnits: the dimension of the input 
 % nInternalUnits: size of the Esn
@@ -33,16 +33,18 @@ esn.nInternalUnits = nInternalUnits;
 esn.nInputUnits = nInputUnits; 
 esn.nOutputUnits = nOutputUnits; 
 
-% set the density of the internal units
-connectivity = min([7/nInternalUnits 1]);
+
+
 %connectivity = 0.2;
 %generate the internal weights of ESN that hasn's been rescaled
 if strcmp(reservoirType,'stdesn')
+    % set the density of the internal units
+    %connectivity = min([7/nInternalUnits 1]);
     esn.internalWeights_NonRS = generate_internal_weights(nInternalUnits, ...
-                                                connectivity);
+                                                varSwarm(1,3:end));
 else
     %disp(reservoirType);
-    esn.internalWeights_NonRS = feval(reservoirType, nInternalUnits) ;
+    esn.internalWeights_NonRS = feval(reservoirType, nInternalUnits,varSwarm(1,3:end)) ;
 end
 esn.nTotalUnits = nInternalUnits + nInputUnits + nOutputUnits;
 
@@ -54,7 +56,7 @@ if inc==0
 else   
     A=randi([0 1],nInternalUnits,nInputUnits);
     A(A==0)=-1;
-    esn.inputWeights =ones(nInternalUnits,nInputUnits)-0.5;
+    esn.inputWeights =ones(nInternalUnits,nInputUnits)-varSwarm(1,2);
     esn.inputWeights=esn.inputWeights.*A; 
 end
 
@@ -76,7 +78,7 @@ esn.reservoirActivationFunction = 'tanh';
 esn.outputActivationFunction = 'identity' ; 
 esn.methodWeightCompute = 'pseudoinverse' ; 
 esn.inverseOutputActivationFunction = 'identity' ; 
-esn.spectralRadius = 1 ; 
+%esn.spectralRadius = 1 ; 
 esn.feedbackScaling = zeros(nOutputUnits, 1); 
 esn.trained = 0 ; 
 esn.type = 'plain_esn' ; 
@@ -97,7 +99,7 @@ for i=1:2:nargs
                         args{i+1};        
    case 'inverseOutputActivationFunction', esn.inverseOutputActivationFunction=args{i+1}; 
    case 'methodWeightCompute', esn.methodWeightCompute = args{i+1} ; 
-   case 'spectralRadius', esn.spectralRadius = args{i+1} ;  
+   %case 'spectralRadius', esn.spectralRadius = args{i+1} ;  
    case 'feedbackScaling',  esn.feedbackScaling = args{i+1} ; 
    case 'type' , esn.type = args{i+1} ;   
    otherwise error('the option does not exist'); 

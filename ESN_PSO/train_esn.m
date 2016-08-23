@@ -35,8 +35,11 @@ teacherCollection = compute_teacher(trainOutput, trained_esn, nForgetPoints) ;
 
 % compute the output weights
 trained_esn.outputWeights = feval(trained_esn.methodWeightCompute, stateCollection, teacherCollection) ;    
-
+if trained_esn.outputWeights==0
+    trained_esn.trained = 0 ;
 % represent this ESN has been trained
-trained_esn.trained = 1 ;          
+else
+    trained_esn.trained = 1 ;
+end
 
 

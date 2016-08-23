@@ -22,7 +22,7 @@ function varargout = ESN(varargin)
 
 % Edit the above text to modify the response to help ESN
 
-% Last Modified by GUIDE v2.5 07-Feb-2014 18:41:44
+% Last Modified by GUIDE v2.5 16-Apr-2014 15:45:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -193,108 +193,103 @@ dataName=get(handles.pushbutton3,'UserData');
 l=length(dataName);
 %disp(dataName);
 %testNumber=get(handles.edit2,'String');
-testNumber=str2double(get(handles.edit2,'String'));
+parNumber=str2double(get(handles.edit2,'String'));
 inputUnits=str2double(get(handles.edit4,'String'));
 internalUnits=str2double(get(handles.edit5,'String'));
 outputUnits=str2double(get(handles.edit6,'String'));
-SR=str2double(get(handles.edit7,'String'));
+%SR=str2double(get(handles.edit7,'String'));
+goal=str2double(get(handles.edit14,'String'));
 TF=str2double(get(handles.edit8,'String'));
 stockName=cell(l,1);
-switch get(handles.popupmenu3,'Value')
-    case 1
-        reservoirType='stdesn';
-    case 2
-        reservoirType='dlr';
-    case 3
-        reservoirType='dlrb';
-    case 4
-        reservoirType='scr';
-    case 5
-        reservoirType=1;
+reservoirType=cell(1,1);
+index=1;
+if get(handles.checkbox1,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox1,'String')));
+    disp(reservoirType(index));
+    index=index+1;
 end
+if get(handles.checkbox2,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox2,'String')));
+    disp(reservoirType(index));
+    index=index+1;
+end
+if get(handles.checkbox3,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox3,'String')));
+    disp(reservoirType(index));
+    index=index+1;
+end
+if get(handles.checkbox4,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox4,'String')));
+    disp(reservoirType(index));
+    index=index+1;
+end
+if get(handles.checkbox5,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox5,'String')));
+    disp(reservoirType(index));
+    index=index+1;
+end
+if get(handles.checkbox6,'Value')
+    reservoirType(index)=cellstr(lower(get(handles.checkbox6,'String')));
+    disp(reservoirType(index));
+end
+%disp(reservoirType);
+%disp(1);
+if ~iscell(dataName)
+    txtName=dataName;
+    l=1;
+end
+tResultStd=zeros(l,6);
+tResultDlr=zeros(l,5);
+tResultDlrb=zeros(l,6);
+tResultScr=zeros(l,5);
+tResultBp=zeros(l,3);
+tResultRbf=zeros(l,3);
+l1=length(reservoirType);
 for i=1:l
-    % check all parameters
-    txtName=char(dataName(i,1));
+    % check all parameters 
+    if  iscell(dataName)
+        txtName=char(dataName(i,1));
+    end
     index1=strfind(txtName, '@');
     index2=strfind(txtName, '.txt');
     stockName(i,1)=cellstr(txtName(index1+1:index2-1));
     disp(txtName);
-    P=checkParameters(txtName,testNumber,inputUnits,internalUnits,outputUnits,SR,TF);
+    P=checkParameters(txtName,parNumber,inputUnits,internalUnits,outputUnits,TF);
+    
     if P
-        if reservoirType
-            for j=1:4
-                switch j
-                    case 1
-                        rType='stdesn';
-                    case 2
-                        rType='dlr';
-                    case 3
-                        rType='dlrb';
-                    case 4
-                        rType='scr';
-                end
-                %excute the main function
-                [bestStateMatrix,bestPredictedTestOutput,testoutputSeq,MSEList,time]=main(txtName,testNumber,inputUnits,internalUnits,outputUnits,SR,TF,rType);
-                %minVar(i,1) =  min(MSEList');
-                %maxVar(i,1) =  max(MSEList');
-                %meanVar(i,1) = mean(MSEList);
-                totalResult(i,j)= min(MSEList');
-                totalResult(i,j+4)= max(MSEList');
-                totalResult(i,j+8)= mean(MSEList);
-                %set(handles.edit10,'String',num2str(min(minVar)));
-                %set(handles.edit11,'String',num2str(max(maxVar)));
-                %set(handles.edit12,'String',num2str(mean(meanVar)));
-                % create the first nPlotPoints steps input-output plots
-                % show MSE
+        for j=1:l1
+            rType=char(reservoirType(j));
+            disp(rType);
+            %excute the main function
+            [bestPredictedTestOutput,testoutputSeq,time,bResult,telapsed,bError]=main(txtName,parNumber,inputUnits,internalUnits,outputUnits,TF,rType,goal);
+            switch rType
+                case 'stdesn';
+                    tResultStd(i,:)=[bResult telapsed bError];
+                case 'dlr'
+                    tResultDlr(i,:)=[bResult telapsed bError];
+                case 'dlrb'
+                    tResultDlrb(i,:)=[bResult telapsed bError];
+                case 'scr'
+                    tResultScr(i,:)=[bResult telapsed bError];
+                case 'bp'
+                    tResultBp(i,:)=[bResult telapsed bError];
+                case 'rbf'
+                    tResultRbf(i,:)=[bResult telapsed bError];
             end
-            save mVar;
-%         else
-%             [bestStateMatrix,bestPredictedTestOutput,testoutputSeq,MSEList,time]=main(dataName,testNumber,inputUnits,internalUnits,outputUnits,SR,TF,reservoirType);
-%             nForgetPoints =100 ;
-%             time=time(nForgetPoints+1:end,:);
-%             Year=year(time);
-%             Month=month(time);
-%             Day=day(time);
-%             set(handles.uitable1,'Data',[Year,Month,Day,testoutputSeq(nForgetPoints+1:end,:),bestPredictedTestOutput]);
-%             
-%             % create the first nPoints steps internal state plots
-%             nPoints = 150 ;
-%             uiwait(msgbox('Mission Accomplished','modal'));
-%             set(handles.edit10,'String',num2str(min(MSEList')));
-%             set(handles.edit11,'String',num2str(max(MSEList')));
-%             set(handles.edit12,'String',num2str(mean(MSEList)));
-%             set(handles.edit13,'String',num2str(var(MSEList')));
-%             %show plot
-%             cla(handles.axes1,'reset');
-%             cla(handles.axes5,'reset');
-%             cla(handles.axes6,'reset');
-%             cla(handles.axes7,'reset');
-%             cla(handles.axes8,'reset');
-%             axes(handles.axes1);
-%             title('testing: teacher sequence (green) & predicted sequence (blue)');
-%             xlabel('The sequence number of the test sets');
-%             ylabel('The closing price');
-%             hold on ;
-%             plot(testoutputSeq(nForgetPoints+1:end, 1),'g') ;
-%             plot(bestPredictedTestOutput) ;
-%             %show first 4 internal states
-%             axes(handles.axes5);
-%             xlabel('The number of steps');
-%             hold on ;
-%             plot(bestStateMatrix(1:nPoints,1));
-%             axes(handles.axes6);
-%             xlabel('The number of steps');
-%             hold on ;
-%             plot(bestStateMatrix(1:nPoints,2));
-%             axes(handles.axes7);
-%             xlabel('The number of steps');
-%             hold on ;
-%             plot(bestStateMatrix(1:nPoints,3));
-%             axes(handles.axes8);
-%             xlabel('The number of steps');
-%             hold on ;
-%             plot(bestStateMatrix(1:nPoints,4));
+            %minVar(i,1) =  min(MSEList');
+            %maxVar(i,1) =  max(MSEList');
+            %meanVar(i,1) = mean(MSEList);
+            %totalResult(i,j)= min(MSEList');
+            %totalResult(i,j+4)= max(MSEList');
+            %totalResult(i,j+8)= mean(MSEList);
+            %set(handles.edit10,'String',num2str(min(minVar)));
+            %set(handles.edit11,'String',num2str(max(maxVar)));
+            %set(handles.edit12,'String',num2str(mean(meanVar)));
+            % create the first nPlotPoints steps input-output plots
+            % show MSE
         end
+        totalResult=[tResultStd tResultDlr tResultDlrb tResultScr tResultBp tResultRbf];
+        save mVar;
     else
         uiwait(errordlg('Please input the correct parameter.', 'Error','modal'));
         set(handles.edit9,'String','');
@@ -302,12 +297,12 @@ for i=1:l
         set(handles.edit4,'String','30');
         set(handles.edit5,'String','96');
         set(handles.edit6,'String','1');
-        set(handles.edit7,'String','0.8');
+        set(handles.edit14,'String','0.0001');
         set(handles.edit8,'String','0.8');
     end
 end
 
-    
+
 uiwait(msgbox('Mission Accomplished','modal'));
 save mVar;
 % hObject    handle to pushbutton1 (see GCBO)
@@ -349,7 +344,7 @@ set(handles.edit2,'String','50');
 set(handles.edit4,'String','30');
 set(handles.edit5,'String','96');
 set(handles.edit6,'String','1');
-set(handles.edit7,'String','0.8');
+set(handles.edit14,'String','0.0001');
 set(handles.edit8,'String','0.8');
 
 % hObject    handle to pushbutton2 (see GCBO)
@@ -383,24 +378,10 @@ end
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
 [fileName,pathName] = uigetfile('*.txt','Select the TXT-file','MultiSelect', 'on');
-%disp(fileName);
-%disp(pathName);
-l=length(fileName);
-%path=zeros(l,1);
-pathall=cell(l,1);
-%disp(l);
-for i=1:l
-    str=char(fileName(1,i));
-    %disp(str);
-    path = fullfile(pathName,str);
-%     data=load(path);
-%     if(length(data)<930)
-%         disp(path);
-%     end
-    pathall(i,1)=cellstr(path);
-end
-%disp(pathall);
+
 if ~iscell(fileName)
+    path = fullfile(pathName,fileName);
+    %disp(path);
     if fileName~=0
         if strcmp(fileName(end-3:end),'.txt')
             set(handles.edit9,'String',fileName);
@@ -412,6 +393,23 @@ if ~iscell(fileName)
         set(hObject,'UserData','0');
     end
 else
+    %disp(fileName);
+    %disp(pathName);
+    l=length(fileName);
+    %path=zeros(l,1);
+    pathall=cell(l,1);
+    %disp(l);
+    for i=1:l
+        str=char(fileName(1,i));
+        %disp(str);
+        path = fullfile(pathName,str);
+        %     data=load(path);
+        %     if(length(data)<930)
+        %         disp(path);
+        %     end
+        pathall(i,1)=cellstr(path);
+    end
+    %disp(pathall);
     str=char(fileName(1,1));
     if str~=0
         if strcmp(str(end-3:end),'.txt')
@@ -619,7 +617,7 @@ set(handles.pushbutton7,'visible','on');
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-function pass=checkParameters(dataName,testNumber,inputUnits,internalUnits,outputUnits,SR,TF)
+function pass=checkParameters(dataName,testNumber,inputUnits,internalUnits,outputUnits,TF)
 pass=1;
 if  strcmp(dataName,'0')
     uiwait(errordlg('dataName can not be null.', 'Error','modal'));
@@ -642,10 +640,10 @@ if  outputUnits<=0 || isempty(outputUnits)
     uiwait(errordlg('outputUnits should be more than 1.', 'Error','modal'));
     pass=0;
 end
-if  SR<=0 || isempty(SR) || SR>1
-    uiwait(errordlg('SR should be a positive number less than 1.', 'Error','modal'));
-    pass=0;
-end
+%if  SR<=0 || isempty(SR) || SR>1
+%    uiwait(errordlg('SR should be a positive number less than 1.', 'Error','modal'));
+ %   pass=0;
+%end
 if  TF<=0 || isempty(TF) || TF>=1
     uiwait(errordlg('TF should be a positive number less than 1.', 'Error','modal'));
     pass=0;
@@ -699,3 +697,114 @@ function edit13_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function edit14_Callback(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit14 as text
+%        str2double(get(hObject,'String')) returns contents of edit14 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit14_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox1.
+function checkbox1_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox1
+
+
+% --- Executes on button press in checkbox2.
+function checkbox2_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox2
+
+
+% --- Executes on button press in checkbox3.
+function checkbox3_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox3
+
+
+% --- Executes on button press in checkbox4.
+function checkbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox4
+
+
+% --- Executes on button press in checkbox5.
+function checkbox5_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox5
+
+
+% --- Executes on button press in checkbox6.
+function checkbox6_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox6
+
+
+% --- Executes on button press in checkbox7.
+function checkbox7_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.checkbox1,'Value',1);
+set(handles.checkbox2,'Value',1);
+set(handles.checkbox3,'Value',1);
+set(handles.checkbox4,'Value',1);
+set(handles.checkbox5,'Value',1);
+set(handles.checkbox6,'Value',1);
+set(handles.checkbox7,'Enable','off');
+set(handles.checkbox8,'Enable','on');
+set(handles.checkbox8,'Value',0);
+% Hint: get(hObject,'Value') returns toggle state of checkbox7
+
+
+% --- Executes on button press in checkbox8.
+function checkbox8_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.checkbox1,'Value',0);
+set(handles.checkbox2,'Value',0);
+set(handles.checkbox3,'Value',0);
+set(handles.checkbox4,'Value',0);
+set(handles.checkbox5,'Value',0);
+set(handles.checkbox6,'Value',0);
+set(handles.checkbox7,'Enable','on');
+set(handles.checkbox8,'Enable','off');
+set(handles.checkbox7,'Value',0);
+% Hint: get(hObject,'Value') returns toggle state of checkbox8

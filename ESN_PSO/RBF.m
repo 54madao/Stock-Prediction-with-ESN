@@ -1,8 +1,8 @@
 %data_r=load('test.txt');
 %data_r=data_r(1:1200,1);
 clear all
-data=load('data601919.txt');
-data=data(1:1230,1);
+data=load('C:\Users\Stanley Guo\Downloads\ESN\ESN8\Data\data601919.txt');
+data=data(1:1230,2);
 inputMax=max(data');
 inputMin=min(data');
 P_r=zeros(1200,30);
@@ -26,7 +26,7 @@ trainoutputSeq_r =(trainoutputSeq_r-inputMin)/(inputMax-inputMin);
 testinputSeq_r = (testinputSeq_r - inputMin)/(inputMax - inputMin);
 %n_b=size(traininputSeq_b,1);
 %建立网络
-net = newrbe( traininputSeq_r' ,trainoutputSeq_r',15) ;
+net = newrbe( traininputSeq_r' ,trainoutputSeq_r',16.4640395676310) ;
 %初始化
 net = init (net) ;
 %for k_b=1:960
@@ -39,12 +39,15 @@ predictedTestOutput_r=zeros(1,240);
 for j_r=1:240
 
 %网络仿真
-predictedTestOutput_r(1,j_r) = sim(net ,testinputSeq_r(j_r,:)') ; %仿真计算
+predictedTestOutput_r(j_r,1) = sim(net ,testinputSeq_r(j_r,:)') ; %仿真计算
 end
 predictedTestOutput_r=predictedTestOutput_r*(inputMax-inputMin)+inputMin;
-predictedTestOutput_r=predictedTestOutput_r(1,101:end);
-testoutputSeq1_r=testoutputSeq_r(101:end,1);
-testError_r = sum((predictedTestOutput_r' - testoutputSeq1_r).^2)/length(predictedTestOutput_r)
+ predictedTestOutput_r=predictedTestOutput_r(101:end,1);
+% testoutputSeq1_r=testoutputSeq_r(101:end,1);
+% testError_r = sum((predictedTestOutput_r' - testoutputSeq1_r).^2)/length(predictedTestOutput_r)
+
+testError = compute_error(predictedTestOutput_r, testoutputSeq_r);
+disp(testError);
 %perf = perform(net,predictedTestOutput_r,testoutputSeq_r')
 figure (1) ;
 plot (testoutputSeq1_r,'r') %画图

@@ -1,5 +1,5 @@
 function internalWeights = generate_internal_weights(nInternalUnits, ...
-                                                  connectivity)
+                                                  varS)
 % create a random reservoir for an ESN
 %  
 %%%%%inputs arguments:
@@ -15,8 +15,8 @@ function internalWeights = generate_internal_weights(nInternalUnits, ...
 success = 0 ;                                               
 while success == 0
     try,
-        internalWeights = sprand(nInternalUnits, nInternalUnits, connectivity);
-        internalWeights(internalWeights ~= 0) = internalWeights(internalWeights ~= 0)  - 0.5;
+        internalWeights = sprand(nInternalUnits, nInternalUnits, varS(1,2));
+        internalWeights(internalWeights ~= 0) = internalWeights(internalWeights ~= 0)  - varS(1,1);
         maxVal = max(abs(eigs(internalWeights)));
         internalWeights = internalWeights/maxVal;
         success = 1 ;

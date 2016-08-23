@@ -1,4 +1,4 @@
-function internalWeights = dlr(nInternalUnits)
+function internalWeights = dlrb(nInternalUnits,varS)
 % create a random reservoir for an ESN
 %  
 %%%%%inputs arguments:
@@ -17,7 +17,8 @@ while success == 0
     try,
         internalWeights=zeros(nInternalUnits, nInternalUnits);
         for i=1:nInternalUnits-1
-            internalWeights(i+1,i)=0.5;
+            internalWeights(i+1,i)=varS(1,1);
+            internalWeights(i,i+1)=varS(1,2);
         end
         success = 1 ;   
     catch,

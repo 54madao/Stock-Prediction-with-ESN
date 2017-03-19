@@ -189,9 +189,9 @@ end
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
 % get all parameters
-dataName=get(handles.edit9,'UserData');
+dataName=get(handles.pushbutton3,'UserData');
 l=length(dataName);
-disp(dataName);
+%disp(dataName);
 %testNumber=get(handles.edit2,'String');
 testNumber=str2double(get(handles.edit2,'String'));
 inputUnits=str2double(get(handles.edit4,'String'));
@@ -212,9 +212,16 @@ switch get(handles.popupmenu3,'Value')
     case 5
         reservoirType=1;
 end
+
+if ~iscell(dataName)
+    txtName=dataName;
+    l=1;
+end
 for i=1:l
     % check all parameters
-    txtName=char(dataName(i,1));
+    if  iscell(dataName)
+        txtName=char(dataName(i,1));
+    end
     index1=strfind(txtName, '@');
     index2=strfind(txtName, '.txt');
     stockName(i,1)=cellstr(txtName(index1+1:index2-1));
@@ -383,24 +390,10 @@ end
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
 [fileName,pathName] = uigetfile('*.txt','Select the TXT-file','MultiSelect', 'on');
-%disp(fileName);
-%disp(pathName);
-l=length(fileName);
-%path=zeros(l,1);
-pathall=cell(l,1);
-%disp(l);
-for i=1:l
-    str=char(fileName(1,i));
-    %disp(str);
-    path = fullfile(pathName,str);
-%     data=load(path);
-%     if(length(data)<930)
-%         disp(path);
-%     end
-    pathall(i,1)=cellstr(path);
-end
-%disp(pathall);
+
 if ~iscell(fileName)
+    path = fullfile(pathName,fileName);
+    %disp(path);
     if fileName~=0
         if strcmp(fileName(end-3:end),'.txt')
             set(handles.edit9,'String',fileName);
@@ -412,6 +405,23 @@ if ~iscell(fileName)
         set(hObject,'UserData','0');
     end
 else
+    %disp(fileName);
+    %disp(pathName);
+    l=length(fileName);
+    %path=zeros(l,1);
+    pathall=cell(l,1);
+    %disp(l);
+    for i=1:l
+        str=char(fileName(1,i));
+        %disp(str);
+        path = fullfile(pathName,str);
+        %     data=load(path);
+        %     if(length(data)<930)
+        %         disp(path);
+        %     end
+        pathall(i,1)=cellstr(path);
+    end
+    %disp(pathall);
     str=char(fileName(1,1));
     if str~=0
         if strcmp(str(end-3:end),'.txt')

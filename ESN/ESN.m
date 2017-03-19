@@ -189,9 +189,9 @@ end
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
 % get all parameters
-dataName=get(handles.pushbutton3,'UserData');
+dataName=get(handles.edit9,'UserData');
 l=length(dataName);
-%disp(dataName);
+disp(dataName);
 %testNumber=get(handles.edit2,'String');
 testNumber=str2double(get(handles.edit2,'String'));
 inputUnits=str2double(get(handles.edit4,'String'));
